@@ -2607,14 +2607,49 @@ namespace
 	}
 	HOOK_ORIG_TYPE Unity_get_fieldOfView_orig;
 	float Unity_get_fieldOfView_hook(void* _this) {
+		static void* lastCameraForOffset = nullptr;
+		static bool offsetFovValid = false;
+		static float lastRawFov = 0.0f;
+		static float lastAppliedFov = 0.0f;
+
 		const auto origFov = HOOK_CAST_CALL(float, Unity_get_fieldOfView)(_this);
 		if (_this == baseCamera) {
+			if (lastCameraForOffset != _this) {
+				lastCameraForOffset = _this;
+				offsetFovValid = false;
+			}
+
 			if (guiStarting) {
-				SCGUIData::sysCamFov = origFov;
+				float baseFov = origFov;
+				if (!g_enable_free_camera && g_enable_camera_offset && offsetFovValid) {
+					auto diff = origFov - lastAppliedFov;
+					if (diff < 0.0f) diff = -diff;
+					if (diff < 0.0001f) {
+						baseFov = lastRawFov;
+					}
+				}
+				SCGUIData::sysCamFov = baseFov;
 			}
 			if (g_enable_free_camera) {
 				const auto fov = SCCamera::baseCamera.fov;
 				Unity_set_fieldOfView_hook(_this, fov);
+				return fov;
+			}
+			if (g_enable_camera_offset) {
+				float baseFov = origFov;
+				if (offsetFovValid) {
+					auto diff = origFov - lastAppliedFov;
+					if (diff < 0.0f) diff = -diff;
+					if (diff < 0.0001f) {
+						baseFov = lastRawFov;
+					}
+				}
+				const auto fov = baseFov + SCCamera::baseCamera.fov;
+				Unity_set_fieldOfView_hook(_this, fov);
+
+				offsetFovValid = true;
+				lastRawFov = baseFov;
+				lastAppliedFov = fov;
 				return fov;
 			}
 		}
@@ -2719,18 +2754,47 @@ namespace
 
 	HOOK_ORIG_TYPE Unity_get_position_orig;
 	Vector3_t Unity_get_position_hook(void* _this) {
+		static void* lastTransformForOffset = nullptr;
+		static bool offsetPosValid = false;
+		static Vector3_t lastRawPos{};
+		static Quaternion_t lastRawRot{};
+		static Vector3_t lastAppliedPos{};
+
 		auto data = HOOK_CAST_CALL(Vector3_t, Unity_get_position)(_this);
 		if (_this == baseCameraTransform) {
+			if (lastTransformForOffset != _this) {
+				lastTransformForOffset = _this;
+				offsetPosValid = false;
+			}
+
+			const auto absf = [](float v) { return v < 0.0f ? -v : v; };
+			const bool posAlreadyOffset = offsetPosValid &&
+				(absf(data.x - lastAppliedPos.x) < 0.0001f) &&
+				(absf(data.y - lastAppliedPos.y) < 0.0001f) &&
+				(absf(data.z - lastAppliedPos.z) < 0.0001f);
+
 			auto ret = Unity_get_rotation_hook(_this);
 			if (guiStarting) {
-				SCGUIData::sysCamPos.x = data.x;
-				SCGUIData::sysCamPos.y = data.y;
-				SCGUIData::sysCamPos.z = data.z;
+				if (!g_enable_free_camera && g_enable_camera_offset && posAlreadyOffset) {
+					SCGUIData::sysCamPos.x = lastRawPos.x;
+					SCGUIData::sysCamPos.y = lastRawPos.y;
+					SCGUIData::sysCamPos.z = lastRawPos.z;
 
-				SCGUIData::sysCamRot.w = ret.w;
-				SCGUIData::sysCamRot.x = ret.x;
-				SCGUIData::sysCamRot.y = ret.y;
-				SCGUIData::sysCamRot.z = ret.z;
+					SCGUIData::sysCamRot.w = lastRawRot.w;
+					SCGUIData::sysCamRot.x = lastRawRot.x;
+					SCGUIData::sysCamRot.y = lastRawRot.y;
+					SCGUIData::sysCamRot.z = lastRawRot.z;
+				}
+				else {
+					SCGUIData::sysCamPos.x = data.x;
+					SCGUIData::sysCamPos.y = data.y;
+					SCGUIData::sysCamPos.z = data.z;
+
+					SCGUIData::sysCamRot.w = ret.w;
+					SCGUIData::sysCamRot.x = ret.x;
+					SCGUIData::sysCamRot.y = ret.y;
+					SCGUIData::sysCamRot.z = ret.z;
+				}
 				SCGUIData::updateSysCamLookAt();
 			}
 			if (g_enable_free_camera) {
@@ -2750,6 +2814,41 @@ namespace
 				up->y = 1;
 				up->z = 0;
 				Unity_InternalLookAt_hook(_this, *pos, *up);
+			}
+			else if (g_enable_camera_offset) {
+				Vector3_t basePos = data;
+				Quaternion_t baseRot = ret;
+				if (posAlreadyOffset) {
+					basePos = lastRawPos;
+					baseRot = lastRawRot;
+				}
+
+				Vector3_t baseLookAt{};
+				BaseCamera::CameraPosRotToLookAt(basePos, baseRot, &baseLookAt);
+
+				Vector3_t finalPos{};
+				finalPos.x = basePos.x + SCCamera::baseCamera.pos.x;
+				finalPos.y = basePos.y + SCCamera::baseCamera.pos.y;
+				finalPos.z = basePos.z + SCCamera::baseCamera.pos.z;
+
+				Vector3_t finalLookAt{};
+				finalLookAt.x = baseLookAt.x + SCCamera::baseCamera.lookAt.x;
+				finalLookAt.y = baseLookAt.y + SCCamera::baseCamera.lookAt.y;
+				finalLookAt.z = baseLookAt.z + SCCamera::baseCamera.lookAt.z;
+
+				Unity_set_position_hook(_this, finalPos);
+
+				Vector3_t up{};
+				up.x = 0;
+				up.y = 1;
+				up.z = 0;
+				Unity_InternalLookAt_hook(_this, finalLookAt, up);
+
+				offsetPosValid = true;
+				lastRawPos = basePos;
+				lastRawRot = baseRot;
+				lastAppliedPos = finalPos;
+				data = finalPos;
 			}
 		}
 
