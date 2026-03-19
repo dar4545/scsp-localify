@@ -23,5 +23,15 @@
     "h": 720,
     "isFull": false
   },
-  "key_space_camera_up": 18
+  "key_space_camera_up": 18,
+  "key_w_camera_forward": "I",
+  "key_s_camera_back": "K",
+  "key_a_camera_left": "J",
+  "key_d_camera_right": "L",
+  "key_up_cameralookat_up": 104,
+  "key_down_cameralookat_down": 98,
+  "key_left_cameralookat_left": 100,
+  "key_right_cameralookat_right": 102,
+  "key_numpad7_camera_roll_left": 103,
+  "key_numpad9_camera_roll_right": 105
 }

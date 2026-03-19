@@ -1,6 +1,7 @@
 #include <stdinclude.hpp>
 #include "camera/baseCamera.hpp"
 #include <mhotkey.hpp>
+#include "scgui/scGUIData.hpp"
 
 
 namespace SCCamera {
@@ -10,23 +11,69 @@ namespace SCCamera {
 
 	bool rMousePressFlg = false;
 
-	void reset_camera() {
-		baseCamera.reset();
+	static BaseCamera::CameraCalc::Quaternion safeRot() {
+		auto& r = baseCamera.rot;
+		if (r.w == 0 && r.x == 0 && r.y == 0 && r.z == 0)
+			return BaseCamera::CameraCalc::Quaternion(1, 0, 0, 0);
+		return BaseCamera::CameraCalc::Quaternion(r.w, r.x, r.y, r.z);
 	}
 
-	void camera_forward() {  // ÏòÇ°
-		baseCamera.set_lon_move(0, LonMoveHState::LonMoveForward);
+	void reset_camera() {
+		baseCamera.fov = SCGUIData::sysCamFov;
+		baseCamera.pos.x = SCGUIData::sysCamPos.x;
+		baseCamera.pos.y = SCGUIData::sysCamPos.y;
+		baseCamera.pos.z = SCGUIData::sysCamPos.z;
+		baseCamera.rot = SCGUIData::sysCamRot;
+		baseCamera.setLookAtFromRot();
+		baseCamera.horizontalAngle = 0;
+		baseCamera.verticalAngle = 0;
 	}
-	void camera_back() {  // ºóÍË
-		baseCamera.set_lon_move(180, LonMoveHState::LonMoveBack);
+
+	void camera_forward() {  // ï¿½ï¿½Ç°
+		auto q = safeRot();
+		BaseCamera::CameraCalc::Vector3 fwd = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(0, 0, 1));
+		float step = BaseCamera::moveStep;
+		baseCamera.pos.x += fwd.x * step;
+		baseCamera.pos.y += fwd.y * step;
+		baseCamera.pos.z += fwd.z * step;
+		baseCamera.lookAt.x += fwd.x * step;
+		baseCamera.lookAt.y += fwd.y * step;
+		baseCamera.lookAt.z += fwd.z * step;
 	}
-	void camera_left() {  // Ïò×ó
-		baseCamera.set_lon_move(90);
+	void camera_back() {  // ï¿½ï¿½ï¿½ï¿½
+		auto q = safeRot();
+		BaseCamera::CameraCalc::Vector3 fwd = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(0, 0, 1));
+		float step = BaseCamera::moveStep;
+		baseCamera.pos.x -= fwd.x * step;
+		baseCamera.pos.y -= fwd.y * step;
+		baseCamera.pos.z -= fwd.z * step;
+		baseCamera.lookAt.x -= fwd.x * step;
+		baseCamera.lookAt.y -= fwd.y * step;
+		baseCamera.lookAt.z -= fwd.z * step;
 	}
-	void camera_right() {  // ÏòÓÒ
-		baseCamera.set_lon_move(-90);
+	void camera_left() {  // ï¿½ï¿½ï¿½ï¿½
+		auto q = safeRot();
+		BaseCamera::CameraCalc::Vector3 right = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(1, 0, 0));
+		float step = BaseCamera::moveStep;
+		baseCamera.pos.x += right.x * step;
+		baseCamera.pos.y += right.y * step;
+		baseCamera.pos.z += right.z * step;
+		baseCamera.lookAt.x += right.x * step;
+		baseCamera.lookAt.y += right.y * step;
+		baseCamera.lookAt.z += right.z * step;
 	}
-	void camera_down() {  // ÏòÏÂ
+	void camera_right() {  // ï¿½ï¿½ï¿½ï¿½
+		auto q = safeRot();
+		BaseCamera::CameraCalc::Vector3 right = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(1, 0, 0));
+		float step = BaseCamera::moveStep;
+		baseCamera.pos.x -= right.x * step;
+		baseCamera.pos.y -= right.y * step;
+		baseCamera.pos.z -= right.z * step;
+		baseCamera.lookAt.x -= right.x * step;
+		baseCamera.lookAt.y -= right.y * step;
+		baseCamera.lookAt.z -= right.z * step;
+	}
+	void camera_down() {  // ï¿½ï¿½ï¿½ï¿½
 		float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel;
 
 		for (int i = 0; i < BaseCamera::smoothLevel; i++) {
@@ -35,7 +82,7 @@ namespace SCCamera {
 			Sleep(BaseCamera::sleepTime);
 		}
 	}
-	void camera_up() {  // ÏòÉÏ
+	void camera_up() {  // ï¿½ï¿½ï¿½ï¿½
 		float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel;
 
 		for (int i = 0; i < BaseCamera::smoothLevel; i++) {
@@ -45,24 +92,22 @@ namespace SCCamera {
 		}
 	}
 	void cameraLookat_up(float mAngel, bool mouse = false) {
-		baseCamera.horizontalAngle += mAngel;
-		if (baseCamera.horizontalAngle >= 90) baseCamera.horizontalAngle = 89.99;
-		baseCamera.updateVertLook();
+		baseCamera.rotateLocal(-mAngel, 0, 0, 1);
 	}
 	void cameraLookat_down(float mAngel, bool mouse = false) {
-		baseCamera.horizontalAngle -= mAngel;
-		if (baseCamera.horizontalAngle <= -90) baseCamera.horizontalAngle = -89.99;
-		baseCamera.updateVertLook();
+		baseCamera.rotateLocal(mAngel, 0, 0, 1);
 	}
 	void cameraLookat_left(float mAngel) {
-		baseCamera.verticalAngle += mAngel;
-		if (baseCamera.verticalAngle >= 360) baseCamera.verticalAngle = -360;
-		baseCamera.setHoriLook(baseCamera.verticalAngle);
+		baseCamera.rotateWorldY(mAngel);
 	}
 	void cameraLookat_right(float mAngel) {
-		baseCamera.verticalAngle -= mAngel;
-		if (baseCamera.verticalAngle <= -360) baseCamera.verticalAngle = 360;
-		baseCamera.setHoriLook(baseCamera.verticalAngle);
+		baseCamera.rotateWorldY(-mAngel);
+	}
+	void cameraRoll_left(float mAngel) {
+		baseCamera.rotateLocal(mAngel, 1, 0, 0);
+	}
+	void cameraRoll_right(float mAngel) {
+		baseCamera.rotateLocal(-mAngel, 1, 0, 0);
 	}
 	void changeCameraFOV(float value) {
 		baseCamera.fov += value;
@@ -129,6 +174,8 @@ namespace SCCamera {
 		bool k = false;
 		bool j = false;
 		bool l = false;
+		bool numpad7 = false;
+		bool numpad9 = false;
 		bool threadRunning = false;
 
 		void resetAll() {
@@ -169,6 +216,8 @@ namespace SCCamera {
 				if (cameraMoveState.right) cameraLookat_right(moveAngel);
 				if (cameraMoveState.q) changeCameraFOV(0.5f);
 				if (cameraMoveState.e) changeCameraFOV(-0.5f);
+				if (cameraMoveState.numpad7) cameraRoll_left(moveAngel);
+				if (cameraMoveState.numpad9) cameraRoll_right(moveAngel);
 				// if (cameraMoveState.i) changeLiveFollowCameraOffsetY(moveStep / 3);
 				// if (cameraMoveState.k) changeLiveFollowCameraOffsetY(-moveStep / 3);
 				// if (cameraMoveState.j) changeLiveFollowCameraOffsetX(moveStep * 10);
@@ -211,6 +260,10 @@ namespace SCCamera {
 				cameraMoveState.q = isKeyDown; break;
 			case KEY_E:
 				cameraMoveState.e = isKeyDown; break;
+			case KEY_NUMPAD7:
+				cameraMoveState.numpad7 = isKeyDown; break;
+			case KEY_NUMPAD9:
+				cameraMoveState.numpad9 = isKeyDown; break;
 				//case 'I':
 				//	cameraMoveState.i = isKeyDown; break;
 				//case 'K':

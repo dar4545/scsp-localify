@@ -283,6 +283,8 @@ namespace
 			ReadJsonKeyBinding("key_e_camera_fov_decrease", KEY_E);
 			ReadJsonKeyBinding("key_r_camera_reset", KEY_R);
 			ReadJsonKeyBinding("key_192_camera_mouseMove", KEY_192);
+			ReadJsonKeyBinding("key_numpad7_camera_roll_left", KEY_NUMPAD7);
+			ReadJsonKeyBinding("key_numpad9_camera_roll_right", KEY_NUMPAD9);
 
 			if (document.HasMember("magicacloth_override")) {
 				g_magicacloth_override = document["magicacloth_override"].GetBool();
