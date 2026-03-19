@@ -45,18 +45,20 @@ namespace BaseCamera {
 			static Quaternion FromEuler(Vector3 euler);
 			static float Dot(const Quaternion& q1, const Quaternion& q2);
 
-			// ¼ÆËã¼Ð½Ç
+			// ï¿½ï¿½ï¿½ï¿½Ð½ï¿½
 			static float Acos(const float x);
 
-			// Slerp·½·¨
+			// Slerpï¿½ï¿½ï¿½ï¿½
 			static Quaternion Slerp(const Quaternion& q1, const Quaternion& q2, const float t);
 		};
 
+		Quaternion RotateQuaternion(const Quaternion& q, float angle_degrees, const Vector3& axis);
+		Vector3 RotateVector(const Quaternion& q, const Vector3& v);
 	}
 
 	extern float moveStep;
-	extern float look_radius;  // ×ªÏò°ë¾¶
-	extern float moveAngel;  // ×ªÏò½Ç¶È
+	extern float look_radius;  // ×ªï¿½ï¿½ë¾¶
+	extern float moveAngel;  // ×ªï¿½ï¿½Ç¶ï¿½
 
 	extern int smoothLevel;
 	extern unsigned long sleepTime;
@@ -86,8 +88,17 @@ namespace BaseCamera {
 		CameraCalc::Vector3 lookAt{0.5, 1.1, -3.7};
 		float fov = 60;
 
-		float horizontalAngle = 0;  // Ë®Æ½·½Ïò½Ç¶È
-		float verticalAngle = 0;  // ´¹Ö±·½Ïò½Ç¶È
+		float horizontalAngle = 0;  // Ë®Æ½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½
+		float verticalAngle = 0;  // ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½
+
+		Quaternion_t rot{1, 0, 0, 0};  // identity quaternion: w=1, x=0, y=0, z=0
+
+		void setRotFromLookAt();
+		void setLookAtFromRot();
+		void setRotEulerDeg(float pitch, float yaw, float roll);
+		void getRotEulerDeg(float* pitch, float* yaw, float* roll);
+		void rotateLocal(float angleDeg, float axisX, float axisY, float axisZ);
+		void rotateWorldY(float angleDeg);
 
 	};
 

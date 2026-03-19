@@ -109,12 +109,12 @@ namespace BaseCamera {
 		//  roll, pitch, yaw
 		Vector3 Quaternion::ToEuler() {
 			Vector3 euler(0, 0, 0);
-			// ¼ÆËã roll (x-axis rotation)
+			// ï¿½ï¿½ï¿½ï¿½ roll (x-axis rotation)
 			double sinr = 2.0 * (w * x + y * z);
 			double cosr = 1.0 - 2.0 * (x * x + y * y);
 			euler.x = atan2(sinr, cosr);
 
-			// ¼ÆËã pitch (y-axis rotation)
+			// ï¿½ï¿½ï¿½ï¿½ pitch (y-axis rotation)
 			double sinp = 2.0 * (w * y - z * x);
 			if (fabs(sinp) >= 1) {
 				euler.y = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
@@ -123,7 +123,7 @@ namespace BaseCamera {
 				euler.y = asin(sinp);
 			}
 
-			// ¼ÆËã yaw (z-axis rotation)
+			// ï¿½ï¿½ï¿½ï¿½ yaw (z-axis rotation)
 			double siny = 2.0 * (w * z + x * y);
 			double cosy = 1.0 - 2.0 * (y * y + z * z);
 			euler.z = atan2(siny, cosy);
@@ -151,7 +151,7 @@ namespace BaseCamera {
 			return q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
 		}
 
-		// ¼ÆËã¼Ð½Ç
+		// ï¿½ï¿½ï¿½ï¿½Ð½ï¿½
 		float Quaternion::Acos(const float x) {
 			if (x < -1.0f) {
 				return M_PI;
@@ -164,7 +164,7 @@ namespace BaseCamera {
 			}
 		}
 
-		// Slerp·½·¨
+		// Slerpï¿½ï¿½ï¿½ï¿½
 		Quaternion Quaternion::Slerp(const Quaternion& q1, const Quaternion& q2, const float t) {
 			Quaternion q3(0, 0, 0, 0);
 			float dot = Quaternion::Dot(q1, q2);
@@ -289,8 +289,8 @@ namespace BaseCamera {
 
 
 	float moveStep = 0.05;
-	float look_radius = 5;  // ×ªÏò°ë¾¶
-	float moveAngel = 1.5;  // ×ªÏò½Ç¶È
+	float look_radius = 5;  // ×ªï¿½ï¿½ë¾¶
+	float moveAngel = 1.5;  // ×ªï¿½ï¿½Ç¶ï¿½
 
 	int smoothLevel = 1;
 	unsigned long sleepTime = 0;
@@ -335,6 +335,8 @@ namespace BaseCamera {
 		fov = 60;
 		verticalAngle = 0;
 		horizontalAngle = 0;
+		rot = {1, 0, 0, 0};
+		setRotFromLookAt();
 	}
 
 	CameraCalc::Vector3 Camera::getPos() {
@@ -345,12 +347,12 @@ namespace BaseCamera {
 		return lookAt;
 	}
 
-	void Camera::set_lon_move(float vertanglePlus, LonMoveHState moveState) {  // Ç°ºóÒÆ¶¯
+	void Camera::set_lon_move(float vertanglePlus, LonMoveHState moveState) {  // Ç°ï¿½ï¿½ï¿½Æ¶ï¿½
 		auto radian = (verticalAngle + vertanglePlus) * M_PI / 180;
 		auto radianH = (double)horizontalAngle * M_PI / 180;
 
-		auto f_step = cos(radian) * moveStep * cos(radianH) / smoothLevel;  // ¡ü¡ý
-		auto l_step = sin(radian) * moveStep * cos(radianH) / smoothLevel;  // ¡û¡ú
+		auto f_step = cos(radian) * moveStep * cos(radianH) / smoothLevel;  // ï¿½ï¿½ï¿½ï¿½
+		auto l_step = sin(radian) * moveStep * cos(radianH) / smoothLevel;  // ï¿½ï¿½ï¿½ï¿½
 		// auto h_step = tan(radianH) * sqrt(pow(f_step, 2) + pow(l_step, 2));
 		auto h_step = sin(radianH) * moveStep / smoothLevel;
 
@@ -372,9 +374,9 @@ namespace BaseCamera {
 		}
 	}
 
-	void Camera::updateVertLook() {  // ÉÏ+
+	void Camera::updateVertLook() {  // ï¿½ï¿½+
 		auto radian = verticalAngle * M_PI / 180;
-		auto radian2 = ((double)horizontalAngle - 90) * M_PI / 180;  // ÈÕ
+		auto radian2 = ((double)horizontalAngle - 90) * M_PI / 180;  // ï¿½ï¿½
 
 		auto stepX1 = look_radius * sin(radian2) * cos(radian) / smoothLevel;
 		auto stepX2 = look_radius * sin(radian2) * sin(radian) / smoothLevel;
@@ -388,7 +390,7 @@ namespace BaseCamera {
 		}
 	}
 
-	void Camera::setHoriLook(float vertangle) {  // ×ó+
+	void Camera::setHoriLook(float vertangle) {  // ï¿½ï¿½+
 		auto radian = vertangle * M_PI / 180;
 		auto radian2 = horizontalAngle * M_PI / 180;
 
@@ -415,6 +417,59 @@ namespace BaseCamera {
 		lookatPosition->x = retPos.x;
 		lookatPosition->y = retPos.y;
 		lookatPosition->z = retPos.z;
+	}
+
+	void Camera::setRotFromLookAt() {
+		CameraCalc::Vector3 dir = lookAt - pos;
+		dir = dir.normalized();
+		CameraCalc::Vector3 up(0, 1, 0);
+		auto q = CameraCalc::LookRotation(dir, up);
+		// LookRotation returns Quaternion(qx, qy, qz, qw) via ctor(w,x,y,z),
+		// so q.w=qx_actual, q.x=qy_actual, q.y=qz_actual, q.z=qw_actual.
+		// Quaternion_t expects {w_actual, x_actual, y_actual, z_actual} = {q.z, q.w, q.x, q.y}.
+		rot = Quaternion_t{ q.z, q.w, q.x, q.y };
+	}
+
+	void Camera::setLookAtFromRot() {
+		Vector3_t vPos{ pos.x, pos.y, pos.z };
+		const auto vLookAt = CameraCalc::GetFrontPos(vPos, rot, look_radius);
+		lookAt.x = vLookAt.x;
+		lookAt.y = vLookAt.y;
+		lookAt.z = vLookAt.z;
+	}
+
+	void Camera::setRotEulerDeg(float pitch, float yaw, float roll) {
+		CameraCalc::Vector3 euler(
+			pitch * (float)M_PI / 180.0f,
+			yaw   * (float)M_PI / 180.0f,
+			roll  * (float)M_PI / 180.0f
+		);
+		auto q = CameraCalc::Quaternion::FromEuler(euler);
+		rot = (Quaternion_t)q;
+	}
+
+	void Camera::getRotEulerDeg(float* pitch, float* yaw, float* roll) {
+		CameraCalc::Quaternion q(rot.w, rot.x, rot.y, rot.z);
+		auto euler = q.ToEuler();
+		*pitch = euler.x * 180.0f / (float)M_PI;
+		*yaw   = euler.y * 180.0f / (float)M_PI;
+		*roll  = euler.z * 180.0f / (float)M_PI;
+	}
+
+	void Camera::rotateLocal(float angleDeg, float axisX, float axisY, float axisZ) {
+		CameraCalc::Quaternion q(rot.w, rot.x, rot.y, rot.z);
+		if (q.w == 0 && q.x == 0 && q.y == 0 && q.z == 0) q = CameraCalc::Quaternion(1, 0, 0, 0);
+		auto result = CameraCalc::RotateQuaternion(q, angleDeg, CameraCalc::Vector3(axisX, axisY, axisZ));
+		rot = (Quaternion_t)result;
+		setLookAtFromRot();
+	}
+
+	void Camera::rotateWorldY(float angleDeg) {
+		CameraCalc::Quaternion q(rot.w, rot.x, rot.y, rot.z);
+		if (q.w == 0 && q.x == 0 && q.y == 0 && q.z == 0) q = CameraCalc::Quaternion(1, 0, 0, 0);
+		auto result = CameraCalc::RotateQuaternion(q, angleDeg, CameraCalc::Vector3(0, 1, 0));
+		rot = (Quaternion_t)result;
+		setLookAtFromRot();
 	}
 
 }
