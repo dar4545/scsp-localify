@@ -521,11 +521,21 @@ namespace SCGUILoop {
 				ImGui::Text("Current 3D Resolution: %d, %d", SCCamera::currRenderResolution.x, SCCamera::currRenderResolution.y);
 			}
 
-			if (ImGui::CollapsingHeader("Camera Info", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::InputFloat("Game Camera FOV", &SCGUIData::sysCamFov);
-				ImGui::InputFloat3("Game Camera Pos (x, y, z)", &SCGUIData::sysCamPos.x);
-				ImGui::InputFloat3("Game Camera LookAt (x, y, z)", &SCGUIData::sysCamLookAt.x);
-				ImGui::InputFloat4("Game Camera Rotation (w, x, y, z)", &SCGUIData::sysCamRot.w);
+			if (ImGui::CollapsingHeader("Raw Camera Info", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::BeginDisabled(true);
+				ImGui::InputFloat("Raw FOV", &SCGUIData::sysCamFov);
+				ImGui::InputFloat3("Raw Pos (x, y, z)", &SCGUIData::sysCamPos.x);
+				ImGui::InputFloat3("Raw LookAt (x, y, z)", &SCGUIData::sysCamLookAt.x);
+				ImGui::InputFloat4("Raw Rotation (w, x, y, z)", &SCGUIData::sysCamRot.w);
+				ImGui::EndDisabled();
+				if (ImGui::Button("Apply Raw Camera")) {
+					SCCamera::baseCamera.fov = SCGUIData::sysCamFov;
+					SCCamera::baseCamera.pos.x = SCGUIData::sysCamPos.x;
+					SCCamera::baseCamera.pos.y = SCGUIData::sysCamPos.y;
+					SCCamera::baseCamera.pos.z = SCGUIData::sysCamPos.z;
+					SCCamera::baseCamera.rot = SCGUIData::sysCamRot;
+					SCCamera::baseCamera.setLookAtFromRot();
+				}
 
 				if (ImGui::CollapsingHeader("Free Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
 					if (g_enable_free_camera && g_enable_camera_offset) {
@@ -533,9 +543,25 @@ namespace SCGUILoop {
 					}
 					if (ImGui::Checkbox("Enable Free Camera", &g_enable_free_camera) && g_enable_free_camera) {
 						g_enable_camera_offset = false;
+						SCCamera::baseCamera.rot.w = SCGUIData::sysCamRot.w;
+						SCCamera::baseCamera.rot.x = SCGUIData::sysCamRot.x;
+						SCCamera::baseCamera.rot.y = SCGUIData::sysCamRot.y;
+						SCCamera::baseCamera.rot.z = SCGUIData::sysCamRot.z;
+						SCCamera::baseCamera.setLookAtFromRot();
 					}
 					if (ImGui::Checkbox("Enable Camera Offset", &g_enable_camera_offset) && g_enable_camera_offset) {
 						g_enable_free_camera = false;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Clear Offset")) {
+						SCCamera::baseCamera.fov = 0;
+						SCCamera::baseCamera.pos.x = 0;
+						SCCamera::baseCamera.pos.y = 0;
+						SCCamera::baseCamera.pos.z = 0;
+						SCCamera::baseCamera.lookAt.x = 0;
+						SCCamera::baseCamera.lookAt.y = 0;
+						SCCamera::baseCamera.lookAt.z = 0;
+						SCCamera::baseCamera.rot = { 1, 0, 0, 0 };
 					}
 					ImGui::Checkbox("Enable ClipPlane overriding", &g_reenable_clipPlane);
 					if (g_reenable_clipPlane) {
@@ -551,7 +577,16 @@ namespace SCGUILoop {
 					INPUT_AND_SLIDER_FLOAT("Mouse Speed", &g_free_camera_mouse_speed, 0.0f, 100.0f);
 					INPUT_AND_SLIDER_FLOAT("Camera FOV", &SCCamera::baseCamera.fov, 0.0f, 360.0f);
 					ImGui::InputFloat3("Camera Pos (x, y, z)", &SCCamera::baseCamera.pos.x);
+					if (ImGui::IsItemDeactivatedAfterEdit()) {
+						SCCamera::baseCamera.setRotFromLookAt();
+					}
 					ImGui::InputFloat3("Camera LookAt (x, y, z)", &SCCamera::baseCamera.lookAt.x);
+					if (ImGui::IsItemDeactivatedAfterEdit()) {
+						SCCamera::baseCamera.setRotFromLookAt();
+					}
+					if (ImGui::InputFloat4("Camera Rotation (w, x, y, z)", &SCCamera::baseCamera.rot.w)) {
+						SCCamera::baseCamera.setLookAtFromRot();
+					}
 
 					ImGui::Separator();
 					ImGui::Text("Save Camera State:");
