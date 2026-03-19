@@ -234,8 +234,8 @@ namespace
 					if (freeCamConfig.HasMember("enable")) {
 						g_enable_free_camera = freeCamConfig["enable"].GetBool();
 					}
-					if (freeCamConfig.HasMember("enableCameraOffset")) {
-						g_enable_camera_offset = freeCamConfig["enableCameraOffset"].GetBool();
+					if (freeCamConfig.HasMember("enableOffsetCamera")) {
+						g_enable_camera_offset = freeCamConfig["enableOffsetCamera"].GetBool();
 					}
 					if (g_enable_free_camera && g_enable_camera_offset) {
 						g_enable_camera_offset = false;

@@ -67,7 +67,7 @@ iM@S SCSP localify plugin.
 | Configuration Item | Type   | Default Value | Description         |
 | ------------------ | ------ | ------------- | --------------------|
 | enable             | Bool   | `false`       | Enable free camera  |
-| enableCameraOffset | Bool   | `false`       | Enable camera offset mode (mutually exclusive with `enable`) |
+| enableOffsetCamera | Bool   | `false`       | Enable camera offset mode (mutually exclusive with `enable`) |
 | moveStep           | Float  | `50`          | Camera movement speed |
 | mouseSpeed         | Float  | `35`          | Mouse sensitivity for camera movement |
 
@@ -95,12 +95,14 @@ iM@S SCSP localify plugin.
 
 ## Free Camera Operation Method
 
-- Movement: `W`, `S`, `A`, `D`
+- Movement: `I`, `K`, `J`, `L`
 - Ascend: `Space` (overwritten as `Alt` in config files distributed after plugin v1.3.6), Descend: `Ctrl`
-- Reset camera: `R`
+- Copy current game camera to free camera: `R`
 
 - Camera Rotation: 
-  - Keyboard: `↑`, `↓`, `←`, `→`
+  - Keyboard: `Numpad 8`, `Numpad 2`, `Numpad 4`, `Numpad 6`
+  > **Note: Numpad keys require NumLock to be ON**
+  - Roll: `Numpad 7` (roll left), `Numpad 9` (roll right)
   - Mouse: 
     - Press the ` key (located to the left of the number keys, above the TAB key)
     - Or **hold down** the right mouse button
@@ -115,21 +117,24 @@ iM@S SCSP localify plugin.
 
 | Configuration Item          | Default Value             |
 | --------------------------- | ------------------------- |
-| key_w_camera_forward        | `W`                       |
-| key_s_camera_back           | `S`                       |
-| key_a_camera_left           | `A`                       |
-| key_d_camera_right          | `D`                       |
+| key_w_camera_forward        | `I`                       |
+| key_s_camera_back           | `K`                       |
+| key_a_camera_left           | `J`                       |
+| key_d_camera_right          | `L`                       |
 | key_ctrl_camera_down        | `17` (ctrl)               |
 | key_space_camera_up         | `18` (alt)                |
-| key_up_cameralookat_up      | `38` (↑)                  |
-| key_down_cameralookat_down  | `40` (↓)                  |
-| key_left_cameralookat_left  | `37` (←)                  |
-| key_right_cameralookat_right| `39` (→)                  |
+| key_up_cameralookat_up      | `104` (Numpad 8)          |
+| key_down_cameralookat_down  | `98` (Numpad 2)           |
+| key_left_cameralookat_left  | `100` (Numpad 4)          |
+| key_right_cameralookat_right| `102` (Numpad 6)          |
+| key_numpad7_camera_roll_left | `103` (Numpad 7)          |
+| key_numpad9_camera_roll_right| `105` (Numpad 9)          |
 | key_q_camera_fov_increase   | `Q`                       |
 | key_e_camera_fov_decrease   | `E`                       |
 | key_r_camera_reset          | `R`                       |
 | key_192_camera_mouseMove    | `192` (`` ` ``, backtick) |
 
+> **Note: Numpad keys require NumLock to be enabled. Key bindings can be customized in scsp-config.json**
 
 About JSON value: For key bindings, two types of values are acceptable:
 - `char[1]` single character string, wrapped by double quotes, to express the letter key, like `"W"` for key W

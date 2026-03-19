@@ -549,11 +549,11 @@ namespace SCGUILoop {
 						SCCamera::baseCamera.rot.z = SCGUIData::sysCamRot.z;
 						SCCamera::baseCamera.setLookAtFromRot();
 					}
-					if (ImGui::Checkbox("Enable Camera Offset", &g_enable_camera_offset) && g_enable_camera_offset) {
+					if (ImGui::Checkbox("Enable Offset Camera", &g_enable_camera_offset) && g_enable_camera_offset) {
 						g_enable_free_camera = false;
 					}
 					ImGui::SameLine();
-					if (ImGui::Button("Clear Offset")) {
+					if (ImGui::Button("Clear Offsets")) {
 						SCCamera::baseCamera.fov = 0;
 						SCCamera::baseCamera.pos.x = 0;
 						SCCamera::baseCamera.pos.y = 0;

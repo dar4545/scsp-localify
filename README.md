@@ -66,7 +66,7 @@
 | 配置项     | 类型  | 默认值  | 说明               |
 | ---------- | ----- | ------- | ------------------ |
 | enable     | Bool  | `false` | 启用自由视角       |
-| enableCameraOffset | Bool  | `false` | 启用镜头偏移模式（与 enable 互斥） |
+| enableOffsetCamera | Bool  | `false` | 启用镜头偏移模式（与 enable 互斥） |
 | moveStep   | Float | `50`    | 摄像机移动速度     |
 | mouseSpeed | Float | `35`    | 鼠标移动视角灵敏度 |
 
@@ -94,12 +94,14 @@
 
 > 下述为默认按键，具体按键可以通过配置文件进行自定义
 
-- 移动: `W`, `S`, `A`, `D`
+- 移动: `I`, `K`, `J`, `L`
 - 上移: `Space` （插件v1.3.6开始分发的配置文件中重载为 `Alt`），下移: `Ctrl`
-- 摄像头复位: `R`
+- 复制当前游戏镜头参数到自由视角: `R`
 
 - 视角转动: 
-  - 键盘: `↑`, `↓`, `←`, `→`
+  - 键盘: `Numpad 8`, `Numpad 2`, `Numpad 4`, `Numpad 6`
+  > **注意：Numpad 方向键需开启 NumLock 才能使用**
+  - 滚转: `Numpad 7` (左滚), `Numpad 9` (右滚)
   - 鼠标: 
     - 按 ` 键（数字键最左边，TAB 键上方）切换
     - 或者**按住**鼠标右键
@@ -115,21 +117,24 @@
 
 | 配置项                       | 默认值                     |
 | --------------------------- | ------------------------- |
-| key_w_camera_forward        | `W`                       |
-| key_s_camera_back           | `S`                       |
-| key_a_camera_left           | `A`                       |
-| key_d_camera_right          | `D`                       |
+| key_w_camera_forward        | `I`                       |
+| key_s_camera_back           | `K`                       |
+| key_a_camera_left           | `J`                       |
+| key_d_camera_right          | `L`                       |
 | key_ctrl_camera_down        | `17` (ctrl)               |
 | key_space_camera_up         | `18` (alt)                |
-| key_up_cameralookat_up      | `38` (↑)                  |
-| key_down_cameralookat_down  | `40` (↓)                  |
-| key_left_cameralookat_left  | `37` (←)                  |
-| key_right_cameralookat_right| `39` (→)                  |
+| key_up_cameralookat_up      | `104` (Numpad 8)          |
+| key_down_cameralookat_down  | `98` (Numpad 2)           |
+| key_left_cameralookat_left  | `100` (Numpad 4)          |
+| key_right_cameralookat_right| `102` (Numpad 6)          |
+| key_numpad7_camera_roll_left | `103` (Numpad 7)          |
+| key_numpad9_camera_roll_right| `105` (Numpad 9)          |
 | key_q_camera_fov_increase   | `Q`                       |
 | key_e_camera_fov_decrease   | `E`                       |
 | key_r_camera_reset          | `R`                       |
 | key_192_camera_mouseMove    | `192` (`` ` ``, backtick) |
 
+> **注意：使用小键盘按键时，需确保 NumLock 处于开启状态；按键设置可在 scsp-config.json 中自定义**
 
 JSON值说明：对于按键设置接受以下两种类型的值：
 - `char[1]` 单字节字符串，即用双引号包绕的单个字母或数字，表示相应的按键，如 `"W"` 表示W键
