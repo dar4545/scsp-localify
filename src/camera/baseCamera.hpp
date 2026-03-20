@@ -45,10 +45,10 @@ namespace BaseCamera {
 			static Quaternion FromEuler(Vector3 euler);
 			static float Dot(const Quaternion& q1, const Quaternion& q2);
 
-			// ����н�
+			// 计算夹角
 			static float Acos(const float x);
 
-			// Slerp����
+			// Slerp方法
 			static Quaternion Slerp(const Quaternion& q1, const Quaternion& q2, const float t);
 		};
 
@@ -57,8 +57,8 @@ namespace BaseCamera {
 	}
 
 	extern float moveStep;
-	extern float look_radius;  // ת��뾶
-	extern float moveAngel;  // ת��Ƕ�
+	extern float look_radius;  // 转向半径
+	extern float moveAngel;  // 转向角度
 
 	extern int smoothLevel;
 	extern unsigned long sleepTime;
@@ -88,8 +88,8 @@ namespace BaseCamera {
 		CameraCalc::Vector3 lookAt{0.5, 1.1, -3.7};
 		float fov = 60;
 
-		float horizontalAngle = 0;  // ˮƽ����Ƕ�
-		float verticalAngle = 0;  // ��ֱ����Ƕ�
+		float horizontalAngle = 0;  // 水平方向角度
+		float verticalAngle = 0;  // 垂直方向角度
 
 		Quaternion_t rot{1, 0, 0, 0};  // identity quaternion: w=1, x=0, y=0, z=0
 

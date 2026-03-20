@@ -29,7 +29,7 @@ namespace SCCamera {
 		baseCamera.verticalAngle = 0;
 	}
 
-	void camera_forward() {  // ��ǰ
+	void camera_forward() {  // 向前
 		auto q = safeRot();
 		BaseCamera::CameraCalc::Vector3 fwd = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(0, 0, 1));
 		float step = BaseCamera::moveStep;
@@ -40,7 +40,7 @@ namespace SCCamera {
 		baseCamera.lookAt.y += fwd.y * step;
 		baseCamera.lookAt.z += fwd.z * step;
 	}
-	void camera_back() {  // ����
+	void camera_back() {  // 后退
 		auto q = safeRot();
 		BaseCamera::CameraCalc::Vector3 fwd = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(0, 0, 1));
 		float step = BaseCamera::moveStep;
@@ -51,7 +51,7 @@ namespace SCCamera {
 		baseCamera.lookAt.y -= fwd.y * step;
 		baseCamera.lookAt.z -= fwd.z * step;
 	}
-	void camera_left() {  // ����
+	void camera_left() {  // 向左
 		auto q = safeRot();
 		BaseCamera::CameraCalc::Vector3 right = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(1, 0, 0));
 		float step = BaseCamera::moveStep;
@@ -62,7 +62,7 @@ namespace SCCamera {
 		baseCamera.lookAt.y += right.y * step;
 		baseCamera.lookAt.z += right.z * step;
 	}
-	void camera_right() {  // ����
+	void camera_right() {  // 向右
 		auto q = safeRot();
 		BaseCamera::CameraCalc::Vector3 right = BaseCamera::CameraCalc::RotateVector(q, BaseCamera::CameraCalc::Vector3(1, 0, 0));
 		float step = BaseCamera::moveStep;
@@ -73,7 +73,7 @@ namespace SCCamera {
 		baseCamera.lookAt.y -= right.y * step;
 		baseCamera.lookAt.z -= right.z * step;
 	}
-	void camera_down() {  // ����
+	void camera_down() {  // 向下
 		float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel;
 
 		for (int i = 0; i < BaseCamera::smoothLevel; i++) {
@@ -82,7 +82,7 @@ namespace SCCamera {
 			Sleep(BaseCamera::sleepTime);
 		}
 	}
-	void camera_up() {  // ����
+	void camera_up() {  // 向上
 		float preStep = BaseCamera::moveStep / BaseCamera::smoothLevel;
 
 		for (int i = 0; i < BaseCamera::smoothLevel; i++) {

@@ -109,12 +109,12 @@ namespace BaseCamera {
 		//  roll, pitch, yaw
 		Vector3 Quaternion::ToEuler() {
 			Vector3 euler(0, 0, 0);
-			// ���� roll (x-axis rotation)
+			// 计算 roll (x-axis rotation)
 			double sinr = 2.0 * (w * x + y * z);
 			double cosr = 1.0 - 2.0 * (x * x + y * y);
 			euler.x = atan2(sinr, cosr);
 
-			// ���� pitch (y-axis rotation)
+			// 计算 pitch (y-axis rotation)
 			double sinp = 2.0 * (w * y - z * x);
 			if (fabs(sinp) >= 1) {
 				euler.y = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
@@ -123,7 +123,7 @@ namespace BaseCamera {
 				euler.y = asin(sinp);
 			}
 
-			// ���� yaw (z-axis rotation)
+			// 计算 yaw (z-axis rotation)
 			double siny = 2.0 * (w * z + x * y);
 			double cosy = 1.0 - 2.0 * (y * y + z * z);
 			euler.z = atan2(siny, cosy);
@@ -151,7 +151,7 @@ namespace BaseCamera {
 			return q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
 		}
 
-		// ����н�
+		// 计算夹角
 		float Quaternion::Acos(const float x) {
 			if (x < -1.0f) {
 				return M_PI;
@@ -164,7 +164,7 @@ namespace BaseCamera {
 			}
 		}
 
-		// Slerp����
+		// Slerp方法
 		Quaternion Quaternion::Slerp(const Quaternion& q1, const Quaternion& q2, const float t) {
 			Quaternion q3(0, 0, 0, 0);
 			float dot = Quaternion::Dot(q1, q2);
@@ -347,12 +347,12 @@ namespace BaseCamera {
 		return lookAt;
 	}
 
-	void Camera::set_lon_move(float vertanglePlus, LonMoveHState moveState) {  // ǰ���ƶ�
+	void Camera::set_lon_move(float vertanglePlus, LonMoveHState moveState) {  // 前后移动
 		auto radian = (verticalAngle + vertanglePlus) * M_PI / 180;
 		auto radianH = (double)horizontalAngle * M_PI / 180;
 
-		auto f_step = cos(radian) * moveStep * cos(radianH) / smoothLevel;  // ����
-		auto l_step = sin(radian) * moveStep * cos(radianH) / smoothLevel;  // ����
+		auto f_step = cos(radian) * moveStep * cos(radianH) / smoothLevel;  // ↑↓
+		auto l_step = sin(radian) * moveStep * cos(radianH) / smoothLevel;  // ←→
 		// auto h_step = tan(radianH) * sqrt(pow(f_step, 2) + pow(l_step, 2));
 		auto h_step = sin(radianH) * moveStep / smoothLevel;
 
@@ -374,9 +374,9 @@ namespace BaseCamera {
 		}
 	}
 
-	void Camera::updateVertLook() {  // ��+
+	void Camera::updateVertLook() {  // 上+
 		auto radian = verticalAngle * M_PI / 180;
-		auto radian2 = ((double)horizontalAngle - 90) * M_PI / 180;  // ��
+		auto radian2 = ((double)horizontalAngle - 90) * M_PI / 180;  // 日
 
 		auto stepX1 = look_radius * sin(radian2) * cos(radian) / smoothLevel;
 		auto stepX2 = look_radius * sin(radian2) * sin(radian) / smoothLevel;
@@ -390,7 +390,7 @@ namespace BaseCamera {
 		}
 	}
 
-	void Camera::setHoriLook(float vertangle) {  // ��+
+	void Camera::setHoriLook(float vertangle) {  // 左+
 		auto radian = vertangle * M_PI / 180;
 		auto radian2 = horizontalAngle * M_PI / 180;
 
